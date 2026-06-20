@@ -68,6 +68,7 @@
 | E3 | `[ ]` | Eye Rest history / stats screen | Track rest events, streaks |
 | E4 | `[ ]` | Widget support (iOS lock screen / home) | `expo-widgets` — future |
 | E5 | `[ ]` | Siri shortcut "Start eye rest" | `expo-shortcuts` — future |
+| E6 | `[ ]` | App-active health check system | Periodic notification (e.g. weekly) reminding user to open app and verify Eye Rest is still running. Needed because iOS can silently kill scheduled notifications after app updates, restarts, or notification permission changes. Implementation: schedule a low-priority "Are your reminders still active?" notification 7 days out; reschedule it each time the app opens (AppState active). If user hasn't opened app in 7 days, notification fires. Show in-app banner on launch if `enabled=true` but no notifications are currently scheduled (detect via `expo-notifications` `getAllScheduledNotificationsAsync`). |
 
 ---
 

@@ -5,6 +5,22 @@ description: Run, restart, and connect myManager to the iOS simulator. Covers fi
 
 # Run myManager on iOS Simulator
 
+## Quick start (use this every time)
+
+```bash
+cd /Users/cguzman/Documents/personal/app/myManager
+npm run dev:ios
+```
+
+That's it. The script handles shims, boots the simulator, starts Metro, and relaunches the app (~5s if already built).
+
+For a full native rebuild (after adding new native packages):
+```bash
+npm run dev:ios:rebuild
+```
+
+---
+
 ## Project location
 ```
 /Users/cguzman/Documents/personal/app/myManager/

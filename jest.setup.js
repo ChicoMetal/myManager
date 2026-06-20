@@ -32,6 +32,9 @@ jest.mock('react-native', () => {
     Linking: {
       openSettings: jest.fn(),
     },
+    Alert: {
+      alert: jest.fn(),
+    },
     Animated: {
       View: (props) => React.createElement('View', { ...props, style: StyleSheet.flatten(props?.style) }),
       createValue: () => ({ addListener: jest.fn() }),
@@ -63,6 +66,8 @@ jest.mock('lucide-react-native', () => ({
   Check: () => null,
   Eye: () => null,
   ChevronRight: () => null,
+  Plus: () => null,
+  Trash2: () => null,
 }));
 
 // Mock react-native-safe-area-context

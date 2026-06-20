@@ -52,4 +52,19 @@ jest.mock('expo-av', () => ({
 jest.mock('lucide-react-native', () => ({
   Play: () => null,
   Check: () => null,
+  Eye: () => null,
+}));
+
+// Mock react-native-safe-area-context
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react');
+  return {
+    SafeAreaView: (props) => React.createElement('SafeAreaView', props),
+    SafeAreaProvider: (props) => React.createElement('SafeAreaProvider', props),
+  };
+});
+
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  useRouter: () => ({ push: jest.fn() }),
 }));

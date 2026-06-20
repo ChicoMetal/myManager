@@ -2,6 +2,7 @@ module.exports = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    '\\.wav$': '<rootDir>/__mocks__/fileMock.js',
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {

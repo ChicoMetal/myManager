@@ -70,6 +70,15 @@ jest.mock('lucide-react-native', () => ({
   Trash2: () => null,
 }));
 
+// Reset React act environment and drain pending async work before each test.
+// This prevents actScopeDepth corruption in React 19 from unawaited fireEvent calls.
+beforeEach(async () => {
+  globalThis.IS_REACT_ACT_ENVIRONMENT = true;
+  // Drain any pending microtasks from previous async tests
+  await new Promise((resolve) => setImmediate(resolve));
+  await new Promise((resolve) => setImmediate(resolve));
+});
+
 // Mock react-native-safe-area-context
 jest.mock('react-native-safe-area-context', () => {
   const React = require('react');

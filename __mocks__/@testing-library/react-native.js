@@ -34,6 +34,27 @@ function renderSync(element, options = {}) {
   React.act(() => {
     renderer.render(wrap(element));
   });
+  // If actScopeDepth is corrupted (stuck > 0 from overlapping unawaited async acts
+  // in a previous test), React.act's flushActQueue is skipped. We manually flush
+  // ReactSharedInternals.actQueue to commit the render work.
+  try {
+    const internals = React.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+    if (internals && internals.actQueue && internals.actQueue.length > 0) {
+      const queue = internals.actQueue;
+      let i = 0;
+      while (i < queue.length) {
+        const callback = queue[i];
+        let continuation = callback(false);
+        while (continuation !== null && continuation !== undefined) {
+          continuation = continuation(false);
+        }
+        i++;
+      }
+      queue.length = 0;
+    }
+  } catch (e) {
+    // Ignore errors from manual flush; tests will fail naturally if render doesn't work
+  }
 
   const container = renderer.container;
 

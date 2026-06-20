@@ -4,7 +4,7 @@ import { COLORS } from '@/constants/colors';
 
 export default function EyeRestLayout() {
   const isDark = useColorScheme() === 'dark';
-  const headerBg = isDark ? COLORS['neutral-800'] : '#ffffff';
+  const headerBg = isDark ? COLORS['neutral-900'] : COLORS['neutral-50'];
   const headerText = isDark ? COLORS['neutral-50'] : COLORS['neutral-900'];
 
   return (

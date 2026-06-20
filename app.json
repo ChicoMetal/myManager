@@ -2,24 +2,32 @@
   "expo": {
     "name": "myManager",
     "slug": "myManager",
+    "scheme": "mymanager",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.personal.mymanager"
     },
     "android": {
+      "package": "com.personal.mymanager",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false
+        "backgroundColor": "#a2d2ff"
+      }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "color": "#a2d2ff",
+          "sounds": ["./assets/sounds/chime.wav", "./assets/sounds/bell.wav", "./assets/sounds/forest.wav", "./assets/sounds/soft.wav", "./assets/sounds/rest-end.wav"]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }

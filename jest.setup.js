@@ -19,11 +19,19 @@ jest.mock('react-native', () => {
     View: (props) => React.createElement('View', { ...props, style: StyleSheet.flatten(props?.style) }),
     Text: (props) => React.createElement('Text', { ...props, style: StyleSheet.flatten(props?.style) }),
     TouchableOpacity: (props) => React.createElement('TouchableOpacity', { ...props, style: StyleSheet.flatten(props?.style) }),
+    Switch: (props) => React.createElement('Switch', { testID: props?.testID, value: props?.value, onValueChange: props?.onValueChange }),
     TextInput: (props) => React.createElement('TextInput', { ...props, style: StyleSheet.flatten(props?.style) }),
     ScrollView: (props) => React.createElement('ScrollView', { ...props, style: StyleSheet.flatten(props?.style) }),
     FlatList: (props) => React.createElement('FlatList', { ...props, style: StyleSheet.flatten(props?.style) }),
     Platform: { OS: 'ios' },
     useWindowDimensions: () => ({ width: 400, height: 800 }),
+    AppState: {
+      currentState: 'active',
+      addEventListener: jest.fn(() => ({ remove: jest.fn() })),
+    },
+    Linking: {
+      openSettings: jest.fn(),
+    },
     Animated: {
       View: (props) => React.createElement('View', { ...props, style: StyleSheet.flatten(props?.style) }),
       createValue: () => ({ addListener: jest.fn() }),
@@ -51,8 +59,10 @@ jest.mock('expo-av', () => ({
 // Mock lucide-react-native
 jest.mock('lucide-react-native', () => ({
   Play: () => null,
+  Pause: () => null,
   Check: () => null,
   Eye: () => null,
+  ChevronRight: () => null,
 }));
 
 // Mock react-native-safe-area-context

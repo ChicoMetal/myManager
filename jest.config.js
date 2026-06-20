@@ -8,6 +8,7 @@ module.exports = {
       tsconfig: {
         jsx: 'react',
       },
+      diagnostics: false,
     }],
   },
   testMatch: ['**/__tests__/**/*.test.ts', '**/__tests__/**/*.test.tsx'],

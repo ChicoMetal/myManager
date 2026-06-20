@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { createAudioPlayer } from 'expo-audio';
+import { createAudioPlayer, setIsAudioActiveAsync, setAudioModeAsync } from 'expo-audio';
 import { Play, Check } from 'lucide-react-native';
 import { Text } from './Text';
 import { SOUNDS } from '@/constants/sounds';
@@ -17,6 +17,8 @@ export function SoundPicker({ value, onChange }: Props) {
   const preview = async (file: number | null) => {
     if (!file) return;
     try {
+      await setAudioModeAsync({ playsInSilentMode: true });
+      await setIsAudioActiveAsync(true);
       playerRef.current?.remove();
       const player = createAudioPlayer(file);
       playerRef.current = player;

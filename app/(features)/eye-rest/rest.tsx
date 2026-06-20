@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { createAudioPlayer } from 'expo-audio';
+import { createAudioPlayer, setIsAudioActiveAsync, setAudioModeAsync } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { useEyeRestStore } from '@/store/eye-rest.store';
 import { Text } from '@/components/ui/Text';
@@ -36,6 +36,8 @@ export default function RestScreen() {
 
   const playRestEndSignal = useCallback(async () => {
     try {
+      await setAudioModeAsync({ playsInSilentMode: true });
+      await setIsAudioActiveAsync(true);
       playerRef.current?.remove();
       const player = createAudioPlayer(require('@/assets/sounds/rest-end.wav'));
       playerRef.current = player;

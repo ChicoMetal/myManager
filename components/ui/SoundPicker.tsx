@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { View, TouchableOpacity } from 'react-native';
-import { Audio } from 'expo-av';
+import { createAudioPlayer } from 'expo-audio';
 import { Play, Check } from 'lucide-react-native';
 import { Text } from './Text';
 import { SOUNDS } from '@/constants/sounds';
@@ -12,17 +12,15 @@ type Props = {
 };
 
 export function SoundPicker({ value, onChange }: Props) {
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const playerRef = useRef<ReturnType<typeof createAudioPlayer> | null>(null);
 
   const preview = async (file: number | null) => {
     if (!file) return;
     try {
-      if (soundRef.current) {
-        await soundRef.current.unloadAsync();
-        soundRef.current = null;
-      }
-      const { sound } = await Audio.Sound.createAsync(file, { shouldPlay: true });
-      soundRef.current = sound;
+      playerRef.current?.remove();
+      const player = createAudioPlayer(file);
+      playerRef.current = player;
+      player.play();
     } catch {
       // silently ignore preview errors
     }

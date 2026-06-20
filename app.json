@@ -22,9 +22,16 @@
         "expo-notifications",
         {
           "color": "#a2d2ff",
-          "sounds": ["./assets/sounds/chime.wav", "./assets/sounds/bell.wav", "./assets/sounds/forest.wav", "./assets/sounds/soft.wav", "./assets/sounds/rest-end.wav"]
+          "sounds": [
+            "./assets/sounds/chime.wav",
+            "./assets/sounds/bell.wav",
+            "./assets/sounds/forest.wav",
+            "./assets/sounds/soft.wav",
+            "./assets/sounds/rest-end.wav"
+          ]
         }
-      ]
+      ],
+      "expo-audio"
     ],
     "experiments": {
       "typedRoutes": true

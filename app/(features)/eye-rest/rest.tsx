@@ -2,7 +2,7 @@ import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
 import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Audio } from 'expo-av';
+import { createAudioPlayer } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
 import { useEyeRestStore } from '@/store/eye-rest.store';
 import { Text } from '@/components/ui/Text';
@@ -27,7 +27,7 @@ export default function RestScreen() {
 
   const [secondsLeft, setSecondsLeft] = useState(restSeconds);
   const autoEndedRef = useRef(false);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const playerRef = useRef<ReturnType<typeof createAudioPlayer> | null>(null);
   // Ref-based countdown for synchronous access inside the interval
   const countdownRef = useRef(restSeconds);
   // Ref for router so interval closure doesn't go stale
@@ -36,11 +36,10 @@ export default function RestScreen() {
 
   const playRestEndSignal = useCallback(async () => {
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        require('@/assets/sounds/rest-end.wav'),
-        { shouldPlay: true }
-      );
-      soundRef.current = sound;
+      playerRef.current?.remove();
+      const player = createAudioPlayer(require('@/assets/sounds/rest-end.wav'));
+      playerRef.current = player;
+      player.play();
     } catch {
       // audio unavailable — haptic still fires
     }
@@ -64,7 +63,7 @@ export default function RestScreen() {
     }, 1000);
     return () => {
       clearInterval(id);
-      soundRef.current?.unloadAsync();
+      playerRef.current?.remove();
     };
   }, []);
 

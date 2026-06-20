@@ -66,11 +66,19 @@ export default function EyeRestScreen() {
 
   useEffect(() => {
     if (!enabled || paused || !nextFireAt) { setCountdown(''); return; }
-    const tick = () => setCountdown(formatCountdown(nextFireAt - Date.now()));
+    const tick = () => {
+      const diff = nextFireAt - Date.now();
+      if (diff <= 0) {
+        setCountdown('');
+        reschedule(); // alarm fired — get next slot
+        return;
+      }
+      setCountdown(formatCountdown(diff));
+    };
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [enabled, paused, nextFireAt]);
+  }, [enabled, paused, nextFireAt, reschedule]);
 
   const handleToggle = async (value: boolean) => {
     if (!value) {

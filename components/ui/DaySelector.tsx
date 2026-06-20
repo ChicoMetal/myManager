@@ -34,6 +34,7 @@ export function DaySelector({ value, onChange }: Props) {
           <TouchableOpacity
             key={dayValue}
             role="button"
+            accessible={true}
             onPress={() => toggle(dayValue)}
             className={`w-9 h-9 rounded-full items-center justify-center ${
               active

@@ -1,33 +1,36 @@
-// Mock react-test-renderer for react-native testing
-jest.mock('react-test-renderer', () => {
-  return {
-    create: jest.fn(),
-    createRoot: jest.fn(() => ({
-      render: jest.fn(),
-      unmount: jest.fn(),
-    })),
-    act: jest.fn((cb) => cb()),
-  };
-});
 
-// Mock react-native first - before any components are imported
+// Mock StyleSheet
+jest.mock('react-native/Libraries/StyleSheet/StyleSheet', () => ({
+  create: (styles) => styles,
+  flatten: (style) => {
+    if (Array.isArray(style)) {
+      return style.reduce((acc, s) => ({ ...acc, ...s }), {});
+    }
+    return style || {};
+  },
+}));
+
+// Mock react-native with proper render support for react-testing-library
 jest.mock('react-native', () => {
+  const React = require('react');
+  const StyleSheet = require('react-native/Libraries/StyleSheet/StyleSheet');
+
   return {
-    Text: function MockText(props) {
-      return null;
+    View: (props) => React.createElement('View', { ...props, style: StyleSheet.flatten(props?.style) }),
+    Text: (props) => React.createElement('Text', { ...props, style: StyleSheet.flatten(props?.style) }),
+    TouchableOpacity: (props) => React.createElement('TouchableOpacity', { ...props, style: StyleSheet.flatten(props?.style) }),
+    TextInput: (props) => React.createElement('TextInput', { ...props, style: StyleSheet.flatten(props?.style) }),
+    ScrollView: (props) => React.createElement('ScrollView', { ...props, style: StyleSheet.flatten(props?.style) }),
+    FlatList: (props) => React.createElement('FlatList', { ...props, style: StyleSheet.flatten(props?.style) }),
+    Platform: { OS: 'ios' },
+    useWindowDimensions: () => ({ width: 400, height: 800 }),
+    Animated: {
+      View: (props) => React.createElement('View', { ...props, style: StyleSheet.flatten(props?.style) }),
+      createValue: () => ({ addListener: jest.fn() }),
+      timing: jest.fn(),
+      sequence: jest.fn(),
     },
-    View: function MockView(props) {
-      return null;
-    },
-    TouchableOpacity: function MockTouchableOpacity(props) {
-      return null;
-    },
-    TextInput: function MockTextInput(props) {
-      return null;
-    },
-    TextProps: {},
-    ViewProps: {},
-    TouchableOpacityProps: {},
+    StyleSheet,
   };
 });
 

@@ -2,7 +2,6 @@ module.exports = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
-    '^test-renderer$': 'react-test-renderer',
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {

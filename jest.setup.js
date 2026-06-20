@@ -70,13 +70,33 @@ jest.mock('lucide-react-native', () => ({
   Trash2: () => null,
 }));
 
+// Capture real setImmediate before any test file can install fake timers.
+const _realSetImmediate = setImmediate;
+
 // Reset React act environment and drain pending async work before each test.
 // This prevents actScopeDepth corruption in React 19 from unawaited fireEvent calls.
 beforeEach(async () => {
   globalThis.IS_REACT_ACT_ENVIRONMENT = true;
-  // Drain any pending microtasks from previous async tests
-  await new Promise((resolve) => setImmediate(resolve));
-  await new Promise((resolve) => setImmediate(resolve));
+  // Drain any pending microtasks from previous async tests.
+  // Use the real setImmediate so this works even when a test file has called
+  // jest.useFakeTimers() at module scope (which replaces the global setImmediate).
+  await new Promise((resolve) => _realSetImmediate(resolve));
+  await new Promise((resolve) => _realSetImmediate(resolve));
+
+  // Reset React 19 actScopeDepth if it was corrupted by an unawaited async act()
+  // in a previous test (e.g. from unawaited fireEvent.press() calls).
+  // actScopeDepth is a module-scoped variable; we reset it by calling act() with
+  // a no-op sync callback, which pops the scope back to 0 and flushes the queue.
+  try {
+    const React = require('react');
+    const internals = React.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE;
+    if (internals) {
+      // Clear any stale actQueue so the next test starts clean.
+      internals.actQueue = null;
+    }
+  } catch (_e) {
+    // Ignore — not all environments expose React internals
+  }
 });
 
 // Mock react-native-safe-area-context

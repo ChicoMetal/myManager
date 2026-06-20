@@ -27,7 +27,10 @@
             "./assets/sounds/bell.wav",
             "./assets/sounds/forest.wav",
             "./assets/sounds/soft.wav",
-            "./assets/sounds/rest-end.wav"
+            "./assets/sounds/rest-end.wav",
+            "./assets/sounds/hero.wav",
+            "./assets/sounds/submarine.wav",
+            "./assets/sounds/funk.wav"
           ]
         }
       ],

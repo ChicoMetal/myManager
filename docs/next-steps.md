@@ -18,8 +18,8 @@
 
 | # | Status | Task | Notes |
 |---|--------|------|-------|
-| A1 | `[ ]` | Source real WAV files for sound picker | ≤30KB, mono, 44.1kHz. Options: freesound.org, zapsplat.com (free tier). Need: chime, bell, forest, soft, rest-end |
-| A2 | `[ ]` | Test sound preview in mode editor on real device | Empty placeholders won't play — needs real files |
+| A1 | `[x]` | Source real WAV files for sound picker | Converted from macOS system sounds via afconvert — 44.1kHz mono WAV, 0.6–1.7s each |
+| A2 | `[ ]` | Test sound preview in mode editor on real device | Need rebuild to bundle new WAV files into iOS app |
 | A3 | `[ ]` | Test rest-end sound + haptic on notification dismiss | Requires real device (notifications don't fire fully in simulator) |
 
 ---
@@ -77,6 +77,32 @@
 |---|--------|------|-------|
 | F1 | `[ ]` | Design finance feature | Follow same brainstorm → spec → plan → subagent flow |
 | F2 | `[ ]` | Add Finance card to dashboard registry | One entry in `lib/features.ts` + new folder `app/(features)/finance/` |
+
+---
+
+## 🌐 Internationalisation (i18n)
+
+| # | Status | Task | Notes |
+|---|--------|------|-------|
+| L1 | `[ ]` | Choose i18n library | Recommended: `i18next` + `react-i18next` + `expo-localization` for device locale detection |
+| L2 | `[ ]` | Extract all hardcoded strings to translation files | Strings live in `locales/en.json` (and `es.json`, etc.); components use `t('key')` hook |
+| L3 | `[ ]` | Add language selector in settings (future settings screen) | Or auto-detect from `expo-localization` — `Localization.locale` |
+| L4 | `[ ]` | Translate: English (base) | All existing UI strings |
+| L5 | `[ ]` | Translate: Spanish | Priority second language |
+| L6 | `[ ]` | RTL layout support | `I18nManager.forceRTL` + NativeWind RTL class variants for Arabic/Hebrew future |
+
+---
+
+## 🎨 Material Design
+
+| # | Status | Task | Notes |
+|---|--------|------|-------|
+| M1 | `[ ]` | Decide scope: full MD3 or MD-inspired on top of current design system | Full MD3 means replacing NativeWind primitives; MD-inspired means adopting MD3 tokens/motion while keeping structure |
+| M2 | `[ ]` | Evaluate `react-native-paper` (MD3) vs custom | `react-native-paper` v5 implements MD3 with theming; alternatively port MD3 color roles to current `constants/theme.ts` |
+| M3 | `[ ]` | Map current palette to MD3 color roles | MD3 roles: primary, onPrimary, primaryContainer, surface, surfaceVariant, etc. Current `#a2d2ff`/`#b8b8ff` maps cleanly to primary/secondary |
+| M4 | `[ ]` | Replace UI primitives with MD3 variants | Button → MD3 FilledButton/TonalButton/TextButton; Card → MD3 ElevatedCard/FilledCard; Badge → MD3 Badge |
+| M5 | `[ ]` | Apply MD3 motion (transitions between screens) | `react-native-reanimated` shared element transitions; Expo Router layout animations |
+| M6 | `[ ]` | MD3 typography scale | MD3 uses: displayLarge/Medium/Small, headlineLarge, titleLarge, bodyLarge, labelLarge — map to current TYPOGRAPHY constants |
 
 ---
 

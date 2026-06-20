@@ -10,11 +10,10 @@ const CATEGORY_ID = 'EYE_REST_ALARM';
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
     shouldShowBanner: true,
     shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
   }),
 });
 

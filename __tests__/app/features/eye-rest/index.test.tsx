@@ -18,6 +18,7 @@ jest.mock('@/lib/notifications', () => ({
   scheduleEyeRestNotifications: jest.fn().mockResolvedValue([new Date(Date.now() + 60000)]),
   cancelAllNotifications: jest.fn().mockResolvedValue(undefined),
   registerNotificationCategories: jest.fn(),
+  getNextFireTimes: jest.fn().mockReturnValue([new Date(Date.now() + 60000)]),
   EYE_REST_ACTION: { DISMISS: 'DISMISS', STOP_REMINDERS: 'STOP_REMINDERS' },
 }));
 
@@ -57,9 +58,10 @@ describe('EyeRestScreen', () => {
   });
 
   it('shows countdown label after enabling', async () => {
-    const { getByTestId, findByText } = render(<EyeRestScreen />);
+    const { getByTestId, findAllByText } = render(<EyeRestScreen />);
     fireEvent(getByTestId('enable-toggle'), 'valueChange', true);
-    expect(await findByText(/Next reminder|Resumes|Sleeping/i)).toBeTruthy();
+    const items = await findAllByText(/Default|Today at|Tomorrow at|Resumes/i);
+    expect(items.length).toBeGreaterThan(0);
   });
 
   it('pause button sets paused state and cancels notifications', async () => {

@@ -10,6 +10,7 @@ import {
   scheduleEyeRestNotifications,
   cancelAllNotifications,
   registerNotificationCategories,
+  getNextFireTimes,
   EYE_REST_ACTION,
 } from '@/lib/notifications';
 import { Text } from '@/components/ui/Text';
@@ -172,30 +173,50 @@ export default function EyeRestScreen() {
           </View>
         )}
 
-        {enabled && !paused && nextFireAt ? (
-          <TouchableOpacity
-            onPress={() => {
-              const dest = activeModes.length === 1
-                ? `/(features)/eye-rest/mode/${activeModes[0].id}`
-                : '/(features)/eye-rest/modes';
-              router.push(dest as any);
-            }}
-            activeOpacity={0.8}
-          >
-            {nextAlarmLabel.startsWith('Today') ? (
-              <Card className="items-center py-6">
-                <Text variant="sm" className="text-neutral-500 dark:text-neutral-400 mb-1">Next reminder</Text>
-                <Text variant="4xl" className="text-brand-500 dark:text-brand-300">{countdown}</Text>
-              </Card>
-            ) : (
-              <Card className="items-center py-6 gap-2">
-                <Moon size={28} color={COLORS['neutral-400']} />
-                <Text variant="base" className="text-neutral-500 dark:text-neutral-400">Sleeping</Text>
-                <Text variant="sm" className="text-neutral-400">{`Resumes ${nextAlarmLabel}`}</Text>
-              </Card>
-            )}
-          </TouchableOpacity>
-        ) : null}
+        {enabled && !paused && activeModes.map(mode => {
+          const times = getNextFireTimes(mode, new Date());
+          const modeNextAt = times[0] ?? null;
+          const modeLabel = modeNextAt ? (() => {
+            const next = modeNextAt;
+            const now = new Date();
+            const timeStr = `${String(next.getHours()).padStart(2,'0')}:${String(next.getMinutes()).padStart(2,'0')}`;
+            if (next.toDateString() === now.toDateString()) return `Today at ${timeStr}`;
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            if (next.toDateString() === tomorrow.toDateString()) return `Tomorrow at ${timeStr}`;
+            const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+            return `${DAYS[next.getDay()]} at ${timeStr}`;
+          })() : null;
+          const isToday = modeLabel?.startsWith('Today') ?? false;
+
+          return (
+            <TouchableOpacity
+              key={mode.id}
+              onPress={() => router.push(`/(features)/eye-rest/mode/${mode.id}` as any)}
+              activeOpacity={0.8}
+            >
+              {isToday ? (
+                <Card className="py-4 gap-1">
+                  <Text variant="lg">{mode.name}</Text>
+                  <Text variant="sm" className="text-neutral-500 dark:text-neutral-400">
+                    Every {mode.intervalMinutes} min · {modeLabel}
+                  </Text>
+                  {mode.id === activeModes[0].id && countdown ? (
+                    <Text variant="2xl" className="text-brand-500 dark:text-brand-300 mt-1">{countdown}</Text>
+                  ) : null}
+                </Card>
+              ) : (
+                <Card className="flex-row items-center gap-3 py-4">
+                  <Moon size={22} color={COLORS['neutral-400']} />
+                  <View className="flex-1">
+                    <Text variant="lg">{mode.name}</Text>
+                    <Text variant="sm" className="text-neutral-400">{`Resumes ${modeLabel}`}</Text>
+                  </View>
+                </Card>
+              )}
+            </TouchableOpacity>
+          );
+        })}
 
         {enabled && paused && (
           <Card className="items-center py-4">
@@ -204,15 +225,8 @@ export default function EyeRestScreen() {
         )}
 
         <TouchableOpacity onPress={() => router.push('/(features)/eye-rest/modes' as any)} activeOpacity={0.8}>
-          <Card className="flex-row items-center justify-between">
-            <View className="flex-1">
-              <Text variant="base" className="text-neutral-500 dark:text-neutral-400 mb-1">Modes</Text>
-              {activeModes.slice(0, 3).map((m) => (
-                <Text key={m.id} variant="sm">{m.name} · {m.intervalMinutes} min</Text>
-              ))}
-              {activeModes.length > 3 && <Text variant="sm" className="text-neutral-400">+{activeModes.length - 3} more</Text>}
-              {activeModes.length === 0 && <Text variant="sm" className="text-neutral-400">No active modes</Text>}
-            </View>
+          <Card className="flex-row items-center justify-between py-3">
+            <Text variant="base" className="text-neutral-500 dark:text-neutral-400">Manage modes</Text>
             <ChevronRight size={20} color={COLORS['neutral-400']} />
           </Card>
         </TouchableOpacity>

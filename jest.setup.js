@@ -50,6 +50,12 @@ jest.mock('nativewind', () => ({
   useColorScheme: jest.fn(() => 'light'),
 }));
 
+// Mock expo-haptics
+jest.mock('expo-haptics', () => ({
+  notificationAsync: jest.fn().mockResolvedValue(undefined),
+  NotificationFeedbackType: { Success: 'success' },
+}));
+
 // Mock expo-audio (replaced expo-av for SDK 56 compat)
 jest.mock('expo-audio', () => ({
   createAudioPlayer: jest.fn(() => ({ play: jest.fn(), remove: jest.fn() })),

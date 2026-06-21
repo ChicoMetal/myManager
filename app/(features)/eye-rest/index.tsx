@@ -3,6 +3,8 @@ import { View, Switch, AppState, AppStateStatus, TouchableOpacity, Linking, Scro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useFocusEffect } from 'expo-router';
 import * as Notifications from 'expo-notifications';
+import * as Haptics from 'expo-haptics';
+import { createAudioPlayer, setIsAudioActiveAsync, setAudioModeAsync } from 'expo-audio';
 import { ChevronRight, Pause, Play, Moon } from 'lucide-react-native';
 import { useEyeRestStore } from '@/store/eye-rest.store';
 import {
@@ -96,16 +98,20 @@ export default function EyeRestScreen() {
       if (diff <= 0) {
         if (!rescheduling.current) {
           rescheduling.current = true;
-          // App in foreground when alarm fires — open rest screen directly.
-          // useFocusEffect will reschedule when rest screen closes.
-          const firingMode = activeModes[0];
-          if (firingMode) {
-            router.push(
-              `/(features)/eye-rest/rest?modeId=${firingMode.id}&dismissed=true` as any
-            );
-          } else {
-            reschedule().finally(() => { rescheduling.current = false; });
-          }
+          // App in foreground when alarm fires — run rest period silently
+          // (pre-scheduled rest-over notification handles background case)
+          const restSecs = activeModes[0]?.restDurationSeconds ?? 20;
+          setTimeout(async () => {
+            try {
+              await setAudioModeAsync({ playsInSilentMode: true });
+              await setIsAudioActiveAsync(true);
+              const player = createAudioPlayer(require('@/assets/sounds/rest-end.wav'));
+              player.play();
+            } catch {}
+            try { await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+            await reschedule();
+            rescheduling.current = false;
+          }, restSecs * 1000);
         }
         return;
       }

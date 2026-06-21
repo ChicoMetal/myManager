@@ -92,9 +92,11 @@ export async function scheduleEyeRestNotifications(
   );
 
   entries.sort((a, b) => a.fireDate.getTime() - b.fireDate.getTime());
-  const capped = entries.slice(0, 60);
+  // Cap at 30 pairs: each alarm + its rest-over = 2 notifications, 30×2=60 ≤ 64 iOS limit
+  const capped = entries.slice(0, 30);
 
   for (const { fireDate, mode } of capped) {
+    // Alarm notification
     await Notifications.scheduleNotificationAsync({
       content: {
         title: `👁 ${mode.name}`,
@@ -104,6 +106,18 @@ export async function scheduleEyeRestNotifications(
         data: { modeId: mode.id },
       },
       trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: fireDate },
+    });
+
+    // Rest-over notification — fires automatically after rest period, no app needed
+    const restOverDate = new Date(fireDate.getTime() + mode.restDurationSeconds * 1000);
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `✅ ${mode.name} — Rest over`,
+        body: 'Back to work.',
+        sound: 'rest-end.wav',
+        data: { modeId: mode.id, type: 'rest-over' },
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: restOverDate },
     });
   }
 

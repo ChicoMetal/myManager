@@ -15,7 +15,7 @@ export type EyeRestMode = {
 
 type State = {
   enabled: boolean;
-  paused: boolean;
+  pausedModeIds: string[];
   activeModeIds: string[];
   modes: EyeRestMode[];
   nextFireAt: number | null;
@@ -23,7 +23,7 @@ type State = {
 
 type Actions = {
   setEnabled: (enabled: boolean) => void;
-  setPaused: (paused: boolean) => void;
+  toggleModePaused: (id: string) => void;
   toggleModeActive: (id: string) => void;
   setModeActive: (id: string, active: boolean) => void;
   addMode: (mode: Omit<EyeRestMode, 'id'>) => EyeRestMode;
@@ -52,13 +52,20 @@ export const useEyeRestStore = create<State & Actions>()(
   persist(
     (set, get) => ({
       enabled: false,
-      paused: false,
+      pausedModeIds: [],
       activeModeIds: ['default'],
       modes: [DEFAULT_MODE],
       nextFireAt: null,
 
       setEnabled: (enabled) => set({ enabled }),
-      setPaused: (paused) => set({ paused }),
+      toggleModePaused: (id) => {
+        const { pausedModeIds } = get();
+        set({
+          pausedModeIds: pausedModeIds.includes(id)
+            ? pausedModeIds.filter((x) => x !== id)
+            : [...pausedModeIds, id],
+        });
+      },
 
       toggleModeActive: (id) => {
         const { activeModeIds } = get();
@@ -101,6 +108,7 @@ export const useEyeRestStore = create<State & Actions>()(
         set((s) => ({
           modes: s.modes.filter((m) => m.id !== id),
           activeModeIds: s.activeModeIds.filter((x) => x !== id),
+          pausedModeIds: s.pausedModeIds.filter((x) => x !== id),
         }));
       },
 
@@ -112,11 +120,12 @@ export const useEyeRestStore = create<State & Actions>()(
       },
 
       getStatusLine: () => {
-        const { enabled, paused } = get();
+        const { enabled, pausedModeIds } = get();
         if (!enabled) return 'Off';
-        if (paused) return 'Paused';
-        const count = get().getActiveModes().length;
-        return `${count} active mode${count !== 1 ? 's' : ''}`;
+        const activeModes = get().getActiveModes();
+        const schedulable = activeModes.filter((m) => !pausedModeIds.includes(m.id));
+        if (schedulable.length === 0) return 'All paused';
+        return `${schedulable.length} active mode${schedulable.length !== 1 ? 's' : ''}`;
       },
     }),
     {

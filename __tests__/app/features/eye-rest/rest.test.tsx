@@ -31,7 +31,7 @@ beforeEach(() => {
   mockBack.mockClear();
   useEyeRestStore.setState({
     enabled: true,
-    paused: false,
+    pausedModeIds: [],
     activeModeIds: ['default'],
     modes: [{
       id: 'default',

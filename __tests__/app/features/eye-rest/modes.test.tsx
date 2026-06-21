@@ -44,7 +44,7 @@ const modes = [
 beforeEach(() => {
   useEyeRestStore.setState({
     enabled: false,
-    paused: false,
+    pausedModeIds: [],
     activeModeIds: ['default'],
     modes,
     nextFireAt: null,

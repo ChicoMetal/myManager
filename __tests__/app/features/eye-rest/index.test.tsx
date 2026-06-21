@@ -37,7 +37,7 @@ const defaultMode = {
 beforeEach(() => {
   useEyeRestStore.setState({
     enabled: false,
-    paused: false,
+    pausedModeIds: [],
     activeModeIds: ['default'],
     modes: [defaultMode],
     nextFireAt: null,
@@ -65,23 +65,23 @@ describe('EyeRestScreen', () => {
     expect(items.length).toBeGreaterThan(0);
   });
 
-  it('pause button sets paused state and cancels notifications', async () => {
-    useEyeRestStore.setState({ enabled: true, paused: false });
+  it('per-mode pause button adds mode to pausedModeIds and cancels notifications', async () => {
+    useEyeRestStore.setState({ enabled: true, pausedModeIds: [] });
     const { getByTestId } = render(<EyeRestScreen />);
-    fireEvent.press(getByTestId('pause-btn'));
+    fireEvent.press(getByTestId('pause-btn-default'));
     await waitFor(() => {
-      expect(useEyeRestStore.getState().paused).toBe(true);
+      expect(useEyeRestStore.getState().pausedModeIds).toContain('default');
     });
     const { cancelAllNotifications } = require('@/lib/notifications');
     expect(cancelAllNotifications).toHaveBeenCalled();
   });
 
-  it('resume button clears paused state and reschedules', async () => {
-    useEyeRestStore.setState({ enabled: true, paused: true });
+  it('per-mode resume button removes mode from pausedModeIds and reschedules', async () => {
+    useEyeRestStore.setState({ enabled: true, pausedModeIds: ['default'] });
     const { getByTestId } = render(<EyeRestScreen />);
-    fireEvent.press(getByTestId('pause-btn'));
+    fireEvent.press(getByTestId('pause-btn-default'));
     await waitFor(() => {
-      expect(useEyeRestStore.getState().paused).toBe(false);
+      expect(useEyeRestStore.getState().pausedModeIds).not.toContain('default');
     });
   });
 

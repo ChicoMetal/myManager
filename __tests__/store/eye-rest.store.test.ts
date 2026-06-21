@@ -20,7 +20,7 @@ const defaultMode = {
 beforeEach(() => {
   useEyeRestStore.setState({
     enabled: false,
-    paused: false,
+    pausedModeIds: [],
     activeModeIds: [DEFAULT_MODE_ID],
     modes: [defaultMode],
     nextFireAt: null,
@@ -67,11 +67,11 @@ describe('useEyeRestStore', () => {
     expect(useEyeRestStore.getState().activeModeIds).toContain(DEFAULT_MODE_ID);
   });
 
-  it('setPaused toggles pause state', () => {
-    useEyeRestStore.getState().setPaused(true);
-    expect(useEyeRestStore.getState().paused).toBe(true);
-    useEyeRestStore.getState().setPaused(false);
-    expect(useEyeRestStore.getState().paused).toBe(false);
+  it('toggleModePaused adds and removes mode from pausedModeIds', () => {
+    useEyeRestStore.getState().toggleModePaused(DEFAULT_MODE_ID);
+    expect(useEyeRestStore.getState().pausedModeIds).toContain(DEFAULT_MODE_ID);
+    useEyeRestStore.getState().toggleModePaused(DEFAULT_MODE_ID);
+    expect(useEyeRestStore.getState().pausedModeIds).not.toContain(DEFAULT_MODE_ID);
   });
 
   it('addMode adds a new mode and returns it with restDurationSeconds', () => {

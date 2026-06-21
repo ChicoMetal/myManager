@@ -32,7 +32,7 @@ function formatCountdown(ms: number): string {
 
 export default function EyeRestScreen() {
   const router = useRouter();
-  const { enabled, paused, nextFireAt, setEnabled, setPaused, setNextFireAt, activeModeIds, modes } =
+  const { enabled, pausedModeIds, nextFireAt, setEnabled, toggleModePaused, setNextFireAt, activeModeIds, modes } =
     useEyeRestStore();
   // Memoize so activeModes reference only changes when store data actually changes
   const activeModes = useMemo(
@@ -59,11 +59,20 @@ export default function EyeRestScreen() {
 
   useEffect(() => { registerNotificationCategories(); }, []);
 
+  const schedulableModes = useMemo(
+    () => activeModes.filter((m) => !pausedModeIds.includes(m.id)),
+    [activeModes, pausedModeIds]
+  );
+
   const reschedule = useCallback(async () => {
-    if (!enabled || paused || activeModes.length === 0) return;
-    const times = await scheduleEyeRestNotifications(activeModes);
+    if (!enabled || schedulableModes.length === 0) {
+      await cancelAllNotifications();
+      setNextFireAt(null);
+      return;
+    }
+    const times = await scheduleEyeRestNotifications(schedulableModes);
     setNextFireAt(times[0]?.getTime() ?? null);
-  }, [enabled, paused, activeModes, setNextFireAt]);
+  }, [enabled, schedulableModes, setNextFireAt]);
 
   // Keep a ref so useFocusEffect never needs reschedule in its deps
   const rescheduleRef = useRef(reschedule);
@@ -103,7 +112,7 @@ export default function EyeRestScreen() {
   }, [router, setNextFireAt]);
 
   useEffect(() => {
-    if (!enabled || paused || !nextFireAt) { setCountdown(''); return; }
+    if (!enabled || schedulableModes.length === 0 || !nextFireAt) { setCountdown(''); return; }
     const tick = () => {
       const diff = nextFireAt - Date.now();
       if (diff <= 0) {
@@ -111,7 +120,7 @@ export default function EyeRestScreen() {
           rescheduling.current = true;
           // App in foreground when alarm fires — run rest period silently
           // (pre-scheduled rest-over notification handles background case)
-          const restSecs = activeModes[0]?.restDurationSeconds ?? 20;
+          const restSecs = schedulableModes[0]?.restDurationSeconds ?? 20;
           setTimeout(async () => {
             try {
               await setAudioModeAsync({ playsInSilentMode: true });
@@ -131,7 +140,7 @@ export default function EyeRestScreen() {
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [enabled, paused, nextFireAt, reschedule]);
+  }, [enabled, schedulableModes, nextFireAt, reschedule]);
 
   const handleToggle = async (value: boolean) => {
     if (!value) {
@@ -144,21 +153,25 @@ export default function EyeRestScreen() {
     if (!granted) { setPermissionDenied(true); return; }
     setPermissionDenied(false);
     setEnabled(true);
-    setPaused(false);
-    const times = await scheduleEyeRestNotifications(activeModes);
+    const times = await scheduleEyeRestNotifications(schedulableModes);
     setNextFireAt(times[0]?.getTime() ?? null);
   };
 
-  const handlePause = async () => {
-    if (paused) {
-      setPaused(false);
-      const times = await scheduleEyeRestNotifications(activeModes);
-      setNextFireAt(times[0]?.getTime() ?? null);
-    } else {
-      setPaused(true);
-      setNextFireAt(null);
+  const handleToggleModePaused = async (modeId: string) => {
+    toggleModePaused(modeId);
+    // reschedule fires via useFocusEffect dep change — trigger manually here
+    // since focus doesn't re-fire on state-only changes
+    const isNowPaused = !pausedModeIds.includes(modeId);
+    const newSchedulable = isNowPaused
+      ? schedulableModes.filter((m) => m.id !== modeId)
+      : [...schedulableModes, activeModes.find((m) => m.id === modeId)!];
+    if (!enabled || newSchedulable.length === 0) {
       await cancelAllNotifications();
+      setNextFireAt(null);
+      return;
     }
+    const times = await scheduleEyeRestNotifications(newSchedulable);
+    setNextFireAt(times[0]?.getTime() ?? null);
   };
 
   const activeCount = activeModeIds.length;
@@ -183,23 +196,6 @@ export default function EyeRestScreen() {
           />
         </Card>
 
-        {enabled && (
-          <TouchableOpacity
-            testID="pause-btn"
-            onPress={handlePause}
-            className={`flex-row items-center justify-center gap-2 rounded-xl py-3 ${
-              paused ? 'bg-brand-100 dark:bg-neutral-700' : 'bg-neutral-100 dark:bg-neutral-800'
-            }`}
-            activeOpacity={0.7}
-          >
-            {paused
-              ? <Play size={18} color={COLORS['brand-500']} />
-              : <Pause size={18} color={COLORS['neutral-500']} />}
-            <Text variant="base" className={paused ? 'text-brand-500 dark:text-brand-300 font-semibold' : 'text-neutral-500 dark:text-neutral-400'}>
-              {paused ? 'Resume' : 'Pause'}
-            </Text>
-          </TouchableOpacity>
-        )}
 
         {permissionDenied && (
           <View className="rounded-xl p-4 gap-2" style={{ backgroundColor: COLORS['error'] + '33' }}>
@@ -212,8 +208,9 @@ export default function EyeRestScreen() {
           </View>
         )}
 
-        {enabled && !paused && activeModes.map(mode => {
-          const times = getNextFireTimes(mode, new Date());
+        {enabled && activeModes.map(mode => {
+          const isModePaused = pausedModeIds.includes(mode.id);
+          const times = isModePaused ? [] : getNextFireTimes(mode, new Date());
           const modeNextAt = times[0] ?? null;
           const modeLabel = modeNextAt ? (() => {
             const next = modeNextAt;
@@ -229,39 +226,58 @@ export default function EyeRestScreen() {
           const isToday = modeLabel?.startsWith('Today') ?? false;
 
           return (
-            <TouchableOpacity
-              key={mode.id}
-              onPress={() => router.push(`/(features)/eye-rest/mode/${mode.id}` as any)}
-              activeOpacity={0.8}
-            >
-              {isToday ? (
-                <Card className="py-4 gap-1">
-                  <Text variant="lg">{mode.name}</Text>
-                  <Text variant="sm" className="text-neutral-500 dark:text-neutral-400">
-                    Every {mode.intervalMinutes} min · {modeLabel}
-                  </Text>
-                  {mode.id === activeModes[0].id && countdown ? (
-                    <Text variant="2xl" className="text-brand-500 dark:text-brand-300 mt-1">{countdown}</Text>
-                  ) : null}
-                </Card>
-              ) : (
-                <Card className="flex-row items-center gap-3 py-4">
-                  <Moon size={22} color={COLORS['neutral-400']} />
-                  <View className="flex-1">
-                    <Text variant="lg">{mode.name}</Text>
-                    <Text variant="sm" className="text-neutral-400">{`Resumes ${modeLabel}`}</Text>
+            <Card key={mode.id} className={`flex-row items-center gap-3 py-4${isModePaused ? ' opacity-50' : ''}`}>
+              <TouchableOpacity
+                className="flex-1"
+                onPress={() => router.push(`/(features)/eye-rest/mode/${mode.id}` as any)}
+                activeOpacity={0.8}
+              >
+                {isModePaused ? (
+                  <View className="flex-row items-center gap-3">
+                    <Moon size={22} color={COLORS['neutral-400']} />
+                    <View>
+                      <Text variant="lg">{mode.name}</Text>
+                      <Text variant="sm" className="text-neutral-400">Paused</Text>
+                    </View>
                   </View>
-                </Card>
-              )}
-            </TouchableOpacity>
+                ) : isToday ? (
+                  <View className="gap-1">
+                    <Text variant="lg">{mode.name}</Text>
+                    <Text variant="sm" className="text-neutral-500 dark:text-neutral-400">
+                      Every {mode.intervalMinutes} min · {modeLabel}
+                    </Text>
+                    {mode.id === schedulableModes[0]?.id && countdown ? (
+                      <Text variant="2xl" className="text-brand-500 dark:text-brand-300 mt-1">{countdown}</Text>
+                    ) : null}
+                  </View>
+                ) : (
+                  <View className="flex-row items-center gap-3">
+                    <Moon size={22} color={COLORS['neutral-400']} />
+                    <View>
+                      <Text variant="lg">{mode.name}</Text>
+                      <Text variant="sm" className="text-neutral-400">{`Resumes ${modeLabel}`}</Text>
+                    </View>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <TouchableOpacity
+                testID={`pause-btn-${mode.id}`}
+                onPress={() => handleToggleModePaused(mode.id)}
+                hitSlop={4}
+                activeOpacity={0.7}
+                className={`items-center justify-center w-12 h-12 rounded-full ${
+                  isModePaused
+                    ? 'bg-brand-100 dark:bg-brand-900'
+                    : 'bg-neutral-200 dark:bg-neutral-700'
+                }`}
+              >
+                {isModePaused
+                  ? <Play size={18} color={COLORS['brand-500']} />
+                  : <Pause size={18} color={COLORS['neutral-500']} />}
+              </TouchableOpacity>
+            </Card>
           );
         })}
-
-        {enabled && paused && (
-          <Card className="items-center py-4">
-            <Text variant="base" className="text-neutral-500 dark:text-neutral-400">Paused — tap Resume to continue</Text>
-          </Card>
-        )}
 
         <TouchableOpacity onPress={() => router.push('/(features)/eye-rest/modes' as any)} activeOpacity={0.8}>
           <Card className="flex-row items-center justify-between py-3">

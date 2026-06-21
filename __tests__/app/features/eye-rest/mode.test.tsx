@@ -8,6 +8,7 @@ const mockBack = jest.fn();
 jest.mock('expo-router', () => ({
   useRouter: () => ({ back: mockBack }),
   useLocalSearchParams: jest.fn(() => ({ id: 'new' })),
+  Stack: Object.assign(() => null, { Screen: () => null }),
 }));
 
 jest.mock('expo-audio', () => ({
@@ -24,7 +25,7 @@ beforeEach(() => {
   mockBack.mockClear();
   useEyeRestStore.setState({
     enabled: false,
-    paused: false,
+    pausedModeIds: [],
     activeModeIds: ['default'],
     modes: [{
       id: 'default',

@@ -82,6 +82,31 @@ full_rebuild() {
   ok "Rebuild complete"
 }
 
+# ── clean rebuild (new sounds / native plugins changed) ────────────────────
+clean_rebuild() {
+  log "Running CLEAN rebuild — wipes ios/ and regenerates (this takes ~8-15 min)..."
+  # Preserve Podfile post_install shim before clean
+  SHIM_BACKUP="/tmp/mymanager_podfile_shim.rb"
+  cat > "$SHIM_BACKUP" << 'SHIM'
+    expo_core_xcfw = File.join(__dir__, 'Pods/ExpoModulesCore/ExpoModulesCore.xcframework')
+    if Dir.exist?(expo_core_xcfw)
+      Dir.glob("#{expo_core_xcfw}/*/ExpoModulesCore.framework/Headers").each do |hdr_dir|
+        File.write("#{hdr_dir}/EXEventEmitter.h", "#import <Foundation/Foundation.h>\n@protocol EXEventEmitter <NSObject>\n- (NSArray<NSString *> *)supportedEvents;\n- (void)startObserving;\n- (void)stopObserving;\n@end\n") unless File.exist?("#{hdr_dir}/EXEventEmitter.h")
+        File.write("#{hdr_dir}/EXEventEmitterService.h", "#import <Foundation/Foundation.h>\n@protocol EXEventEmitterService <NSObject>\n- (void)sendEventWithName:(NSString *)eventName body:(id)body;\n@end\n") unless File.exist?("#{hdr_dir}/EXEventEmitterService.h")
+        File.write("#{hdr_dir}/EXLegacyExpoViewProtocol.h", "#import <Foundation/Foundation.h>\n@protocol EXLegacyExpoViewProtocol <NSObject>\n@optional\n- (void)setModuleRegistry:(id)moduleRegistry;\n@end\n") unless File.exist?("#{hdr_dir}/EXLegacyExpoViewProtocol.h")
+      end
+    end
+SHIM
+  npx expo prebuild --clean --platform ios
+  # Re-inject shim into regenerated Podfile
+  sed -i '' "/react_native_post_install/,/^    )$/ { /^    )$/a\\
+$(cat $SHIM_BACKUP)
+}" ios/Podfile
+  recreate_shims
+  npx expo run:ios --device "iPhone 17 Pro"
+  ok "Clean rebuild complete"
+}
+
 # ── main ───────────────────────────────────────────────────────────────────
 echo ""
 echo "  myManager dev runner"
@@ -89,6 +114,8 @@ echo "  ─────────────────────"
 
 if [ "$1" = "--rebuild" ]; then
   full_rebuild
+elif [ "$1" = "--clean" ]; then
+  clean_rebuild
 else
   recreate_shims
   boot_simulator

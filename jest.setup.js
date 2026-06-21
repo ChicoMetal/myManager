@@ -50,13 +50,11 @@ jest.mock('nativewind', () => ({
   useColorScheme: jest.fn(() => 'light'),
 }));
 
-// Mock expo-av
-jest.mock('expo-av', () => ({
-  Audio: {
-    Sound: {
-      createAsync: jest.fn(),
-    },
-  },
+// Mock expo-audio (replaced expo-av for SDK 56 compat)
+jest.mock('expo-audio', () => ({
+  createAudioPlayer: jest.fn(() => ({ play: jest.fn(), remove: jest.fn() })),
+  setIsAudioActiveAsync: jest.fn().mockResolvedValue(undefined),
+  setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
 // Mock lucide-react-native

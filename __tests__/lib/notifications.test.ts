@@ -26,9 +26,14 @@ const longRestMode: EyeRestMode = {
 };
 
 describe('getNextFireTimes', () => {
-  it('returns empty array when current day is not in activeDays', () => {
+  it('skips current day when not in activeDays, returns next active day slots', () => {
+    // Sunday (day=0) not in workMode activeDays [1-5]; next active = Monday
     const sunday = new Date('2026-06-21T10:00:00');
-    expect(getNextFireTimes(workMode, sunday)).toHaveLength(0);
+    const times = getNextFireTimes(workMode, sunday);
+    expect(times.length).toBeGreaterThan(0);
+    // All returned times should be on Monday (2026-06-22) or later
+    times.forEach((t) => expect(t.getTime()).toBeGreaterThan(sunday.getTime()));
+    expect(times[0].getDay()).toBe(1); // Monday
   });
 
   it('returns fire times within the active window', () => {
@@ -45,9 +50,12 @@ describe('getNextFireTimes', () => {
     expect(first.getMinutes()).toBe(20);
   });
 
-  it('returns empty array when called after active window ends', () => {
+  it('after active window ends, returns next active day slots', () => {
+    // Monday 7pm — today's window (09:00-18:00) is done; next = Tuesday
     const monday7pm = new Date('2026-06-22T19:00:00');
-    expect(getNextFireTimes(workMode, monday7pm)).toHaveLength(0);
+    const times = getNextFireTimes(workMode, monday7pm);
+    expect(times.length).toBeGreaterThan(0);
+    expect(times[0].getDay()).toBe(2); // Tuesday
   });
 });
 

@@ -12,14 +12,10 @@ jest.mock('expo-router', () => ({
   useLocalSearchParams: jest.fn(() => ({ modeId: 'default', dismissed: 'true' })),
 }));
 
-jest.mock('expo-av', () => ({
-  Audio: {
-    Sound: {
-      createAsync: jest.fn().mockResolvedValue({
-        sound: { playAsync: jest.fn(), unloadAsync: jest.fn() },
-      }),
-    },
-  },
+jest.mock('expo-audio', () => ({
+  createAudioPlayer: jest.fn().mockReturnValue({ play: jest.fn(), remove: jest.fn() }),
+  setIsAudioActiveAsync: jest.fn().mockResolvedValue(undefined),
+  setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('expo-haptics', () => ({
@@ -69,22 +65,24 @@ describe('RestScreen', () => {
   });
 
   it('plays sound and haptic when dismissed=true and Done early pressed', async () => {
-    const { Audio } = require('expo-av');
+    const expoAudio = require('expo-audio');
+    expoAudio.createAudioPlayer.mockClear();
     const Haptics = require('expo-haptics');
+    Haptics.notificationAsync.mockClear();
     const { getByText } = render(<RestScreen />);
     fireEvent.press(getByText('Done early'));
     await waitFor(() => {
-      expect(Audio.Sound.createAsync).toHaveBeenCalled();
+      expect(expoAudio.createAudioPlayer).toHaveBeenCalled();
       expect(Haptics.notificationAsync).toHaveBeenCalled();
     });
   });
 
   it('auto-navigates back when countdown reaches 0 without playing sound', async () => {
-    const { Audio } = require('expo-av');
-    Audio.Sound.createAsync.mockClear();
+    const expoAudio = require('expo-audio');
+    expoAudio.createAudioPlayer.mockClear();
     render(<RestScreen />);
     act(() => { jest.advanceTimersByTime(6000); });
     await waitFor(() => expect(mockBack).toHaveBeenCalled());
-    expect(Audio.Sound.createAsync).not.toHaveBeenCalled();
+    expect(expoAudio.createAudioPlayer).not.toHaveBeenCalled();
   });
 });

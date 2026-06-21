@@ -13,8 +13,8 @@ module.exports = {
     doNotFake: ['setImmediate', 'queueMicrotask'],
   },
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
     '\\.wav$': '<rootDir>/__mocks__/fileMock.js',
+    '^@/(.*)$': '<rootDir>/$1',
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {

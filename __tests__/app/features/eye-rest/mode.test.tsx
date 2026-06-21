@@ -10,8 +10,10 @@ jest.mock('expo-router', () => ({
   useLocalSearchParams: jest.fn(() => ({ id: 'new' })),
 }));
 
-jest.mock('expo-av', () => ({
-  Audio: { Sound: { createAsync: jest.fn().mockResolvedValue({ sound: { unloadAsync: jest.fn() } }) } },
+jest.mock('expo-audio', () => ({
+  createAudioPlayer: jest.fn().mockReturnValue({ play: jest.fn(), remove: jest.fn() }),
+  setIsAudioActiveAsync: jest.fn().mockResolvedValue(undefined),
+  setAudioModeAsync: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock('@react-native-async-storage/async-storage', () =>

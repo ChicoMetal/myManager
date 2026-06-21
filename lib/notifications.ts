@@ -40,25 +40,36 @@ export async function requestNotificationPermission(): Promise<boolean> {
 }
 
 export function getNextFireTimes(mode: EyeRestMode, now: Date = new Date()): Date[] {
-  const dayOfWeek = now.getDay();
-  if (!mode.activeDays.includes(dayOfWeek)) return [];
-
   const [startH, startM] = mode.activeStart.split(':').map(Number);
   const [endH, endM] = mode.activeEnd.split(':').map(Number);
   const startMinutes = startH * 60 + startM;
   const endMinutes = endH * 60 + endM;
-  const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
   const times: Date[] = [];
-  let cursor = startMinutes + mode.intervalMinutes;
+  // Scan up to 7 days forward to fill 60-slot cap across day boundaries
+  const dayCursor = new Date(now);
 
-  while (cursor <= endMinutes) {
-    if (cursor > nowMinutes) {
-      const fire = new Date(now);
-      fire.setHours(Math.floor(cursor / 60), cursor % 60, 0, 0);
-      times.push(fire);
+  for (let day = 0; day < 7 && times.length < 60; day++) {
+    const dayOfWeek = dayCursor.getDay();
+    if (mode.activeDays.includes(dayOfWeek)) {
+      // On day 0 start from current time; on future days start from window open
+      const nowMinutes = day === 0
+        ? dayCursor.getHours() * 60 + dayCursor.getMinutes()
+        : -1;
+
+      let slot = startMinutes + mode.intervalMinutes;
+      while (slot <= endMinutes && times.length < 60) {
+        if (slot > nowMinutes) {
+          const fire = new Date(dayCursor);
+          fire.setHours(Math.floor(slot / 60), slot % 60, 0, 0);
+          times.push(fire);
+        }
+        slot += mode.intervalMinutes;
+      }
     }
-    cursor += mode.intervalMinutes;
+    // Advance to next calendar day at midnight
+    dayCursor.setDate(dayCursor.getDate() + 1);
+    dayCursor.setHours(0, 0, 0, 0);
   }
 
   return times;

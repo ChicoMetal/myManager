@@ -59,7 +59,7 @@ describe('EyeRestScreen', () => {
   it('shows countdown label after enabling', async () => {
     const { getByTestId, findByText } = render(<EyeRestScreen />);
     fireEvent(getByTestId('enable-toggle'), 'valueChange', true);
-    expect(await findByText(/Next:/i)).toBeTruthy();
+    expect(await findByText(/Next reminder|Resumes|Sleeping/i)).toBeTruthy();
   });
 
   it('pause button sets paused state and cancels notifications', async () => {

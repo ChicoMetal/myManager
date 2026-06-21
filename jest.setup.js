@@ -61,6 +61,7 @@ jest.mock('expo-audio', () => ({
 jest.mock('lucide-react-native', () => ({
   Play: () => null,
   Pause: () => null,
+  Moon: () => null,
   Check: () => null,
   Eye: () => null,
   ChevronRight: () => null,

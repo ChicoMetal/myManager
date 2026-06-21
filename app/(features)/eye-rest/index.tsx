@@ -3,7 +3,7 @@ import { View, Switch, AppState, AppStateStatus, TouchableOpacity, Linking, Scro
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as Notifications from 'expo-notifications';
-import { ChevronRight, Pause, Play } from 'lucide-react-native';
+import { ChevronRight, Pause, Play, Moon } from 'lucide-react-native';
 import { useEyeRestStore } from '@/store/eye-rest.store';
 import {
   requestNotificationPermission,
@@ -18,12 +18,8 @@ import { COLORS } from '@/constants/colors';
 
 function formatCountdown(ms: number): string {
   const total = Math.max(0, ms);
-  const hours = Math.floor(total / 3600000);
-  const mins = Math.floor((total % 3600000) / 60000);
+  const mins = Math.floor(total / 60000);
   const secs = Math.floor((total % 60000) / 1000);
-  if (hours > 0) {
-    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  }
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
@@ -176,14 +172,19 @@ export default function EyeRestScreen() {
           </View>
         )}
 
-        {enabled && !paused && countdown ? (
-          <Card className="items-center py-6">
-            <Text variant="sm" className="text-neutral-500 dark:text-neutral-400 mb-1">Next:</Text>
-            <Text variant="4xl" className="text-brand-500 dark:text-brand-300">{countdown}</Text>
-            {nextAlarmLabel ? (
-              <Text variant="xs" className="text-neutral-400 mt-2">{nextAlarmLabel}</Text>
-            ) : null}
-          </Card>
+        {enabled && !paused && nextFireAt ? (
+          nextAlarmLabel.startsWith('Today') ? (
+            <Card className="items-center py-6">
+              <Text variant="sm" className="text-neutral-500 dark:text-neutral-400 mb-1">Next reminder</Text>
+              <Text variant="4xl" className="text-brand-500 dark:text-brand-300">{countdown}</Text>
+            </Card>
+          ) : (
+            <Card className="items-center py-6 gap-2">
+              <Moon size={28} color={COLORS['neutral-400']} />
+              <Text variant="base" className="text-neutral-500 dark:text-neutral-400">Sleeping</Text>
+              <Text variant="sm" className="text-neutral-400">{`Resumes ${nextAlarmLabel}`}</Text>
+            </Card>
+          )
         ) : null}
 
         {enabled && paused && (

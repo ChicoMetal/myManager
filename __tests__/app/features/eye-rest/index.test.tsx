@@ -4,8 +4,10 @@ import EyeRestScreen from '@/app/(features)/eye-rest/index';
 import { useEyeRestStore } from '@/store/eye-rest.store';
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), navigate: jest.fn() }),
+  useNavigation: () => ({ setOptions: jest.fn() }),
   useFocusEffect: jest.fn(),
+  Stack: Object.assign(() => null, { Screen: () => null }),
 }));
 
 jest.mock('expo-notifications');

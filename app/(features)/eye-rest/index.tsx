@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-import { View, Switch, AppState, AppStateStatus, TouchableOpacity, Linking, ScrollView } from 'react-native';
+import { View, Switch, AppState, AppStateStatus, TouchableOpacity, Linking, ScrollView, useColorScheme, Text as RNText } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter, useFocusEffect, Stack, useNavigation } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import * as Haptics from 'expo-haptics';
 import { createAudioPlayer, setIsAudioActiveAsync, setAudioModeAsync } from 'expo-audio';
-import { ChevronRight, Pause, Play, Moon } from 'lucide-react-native';
+import { ChevronRight, Pause, Play, Moon, Settings, Home } from 'lucide-react-native';
 import { useEyeRestStore } from '@/store/eye-rest.store';
 import {
   requestNotificationPermission,
@@ -32,6 +32,9 @@ function formatCountdown(ms: number): string {
 
 export default function EyeRestScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
+  const isDark = useColorScheme() === 'dark';
+  const headerText = isDark ? COLORS['neutral-50'] : COLORS['neutral-900'];
   const { enabled, pausedModeIds, nextFireAt, setEnabled, toggleModePaused, setNextFireAt, activeModeIds, modes } =
     useEyeRestStore();
   // Memoize so activeModes reference only changes when store data actually changes
@@ -42,6 +45,42 @@ export default function EyeRestScreen() {
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [countdown, setCountdown] = useState('');
   const [nowMs, setNowMs] = useState(Date.now());
+  const [configOpen, setConfigOpen] = useState(false);
+  const toggleConfig = () => setConfigOpen(v => !v);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <>
+          <TouchableOpacity
+            onPress={toggleConfig}
+            hitSlop={8}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              alignItems: 'center', justifyContent: 'center',
+              marginRight: 10,
+              backgroundColor: configOpen
+                ? (isDark ? COLORS['brand-900'] : COLORS['brand-100'])
+                : (isDark ? COLORS['neutral-700'] : COLORS['neutral-200']),
+            }}
+          >
+            <Settings size={18} color={configOpen ? COLORS['brand-500'] : headerText} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.navigate('/')}
+            hitSlop={8}
+            style={{
+              width: 36, height: 36, borderRadius: 18,
+              alignItems: 'center', justifyContent: 'center',
+              backgroundColor: isDark ? COLORS['neutral-700'] : COLORS['neutral-200'],
+            }}
+          >
+            <Home size={18} color={headerText} />
+          </TouchableOpacity>
+        </>
+      ),
+    });
+  }, [configOpen, isDark]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -185,24 +224,33 @@ export default function EyeRestScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-neutral-900" edges={['bottom']}>
-      <ScrollView className="flex-1 px-4 pt-6" contentContainerClassName="gap-4 pb-12">
-
-        <Card className="flex-row items-center justify-between">
-          <View>
-            <Text variant="lg">Eye Rest Reminders</Text>
-            <Text variant="sm" className="text-neutral-500 dark:text-neutral-400 mt-1">
-              {activeCount} active mode{activeCount !== 1 ? 's' : ''}
-            </Text>
+      <View style={{ height: configOpen ? 64 : 0, overflow: 'hidden' }}>
+        <View style={{
+          height: 64,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          paddingHorizontal: 16,
+          backgroundColor: isDark ? COLORS['neutral-800'] : COLORS['neutral-100'],
+          borderBottomWidth: 1,
+          borderBottomColor: isDark ? COLORS['neutral-700'] : COLORS['neutral-200'],
+        }}>
+          <View style={{ justifyContent: 'center' }}>
+            <RNText style={{ color: isDark ? COLORS['neutral-100'] : COLORS['neutral-900'], fontSize: 16 }}>Reminders enabled</RNText>
           </View>
-          <Switch
-            testID="enable-toggle"
-            value={enabled}
-            onValueChange={handleToggle}
-            trackColor={{ true: COLORS['brand-400'], false: COLORS['neutral-300'] }}
-            thumbColor={enabled ? COLORS['brand-500'] : '#ffffff'}
-          />
-        </Card>
+          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+            <Switch
+              testID="enable-toggle"
+              value={enabled}
+              onValueChange={handleToggle}
+              trackColor={{ true: COLORS['brand-400'], false: COLORS['neutral-300'] }}
+              thumbColor={enabled ? COLORS['brand-500'] : '#ffffff'}
+            />
+          </View>
+        </View>
+      </View>
 
+      <ScrollView className="flex-1 px-4 pt-6" contentContainerClassName="gap-4 pb-12">
 
         {permissionDenied && (
           <View className="rounded-xl p-4 gap-2" style={{ backgroundColor: COLORS['error'] + '33' }}>
@@ -287,6 +335,10 @@ export default function EyeRestScreen() {
             </Card>
           );
         })}
+
+        <Text variant="sm" className="text-neutral-500 dark:text-neutral-400 text-center">
+          {activeCount} active mode{activeCount !== 1 ? 's' : ''}
+        </Text>
 
         <TouchableOpacity onPress={() => router.push('/(features)/eye-rest/modes' as any)} activeOpacity={0.8}>
           <Card className="flex-row items-center justify-between py-3">

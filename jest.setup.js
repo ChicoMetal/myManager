@@ -24,6 +24,7 @@ jest.mock('react-native', () => {
     ScrollView: (props) => React.createElement('ScrollView', { ...props, style: StyleSheet.flatten(props?.style) }),
     FlatList: (props) => React.createElement('FlatList', { ...props, style: StyleSheet.flatten(props?.style) }),
     Platform: { OS: 'ios' },
+    useColorScheme: () => 'light',
     useWindowDimensions: () => ({ width: 400, height: 800 }),
     AppState: {
       currentState: 'active',
@@ -73,6 +74,8 @@ jest.mock('lucide-react-native', () => ({
   ChevronRight: () => null,
   Plus: () => null,
   Trash2: () => null,
+  Settings: () => null,
+  Home: () => null,
 }));
 
 // Capture real setImmediate before any test file can install fake timers.
@@ -115,7 +118,8 @@ jest.mock('react-native-safe-area-context', () => {
 
 // Mock expo-router
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: jest.fn(), back: jest.fn(), dismissAll: jest.fn() }),
+  useRouter: () => ({ push: jest.fn(), back: jest.fn(), dismissAll: jest.fn(), navigate: jest.fn() }),
+  useNavigation: () => ({ setOptions: jest.fn() }),
   useLocalSearchParams: jest.fn(() => ({})),
   useFocusEffect: jest.fn(),
   Link: ({ children }) => children,

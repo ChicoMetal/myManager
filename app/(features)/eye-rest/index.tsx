@@ -181,14 +181,12 @@ export default function EyeRestScreen() {
               <Card className="items-center py-6">
                 <Text variant="sm" className="text-neutral-500 dark:text-neutral-400 mb-1">Next reminder</Text>
                 <Text variant="4xl" className="text-brand-500 dark:text-brand-300">{countdown}</Text>
-                <Text variant="xs" className="text-neutral-400 mt-2">Tap to configure</Text>
               </Card>
             ) : (
               <Card className="items-center py-6 gap-2">
                 <Moon size={28} color={COLORS['neutral-400']} />
                 <Text variant="base" className="text-neutral-500 dark:text-neutral-400">Sleeping</Text>
                 <Text variant="sm" className="text-neutral-400">{`Resumes ${nextAlarmLabel}`}</Text>
-                <Text variant="xs" className="text-neutral-400">Tap to configure</Text>
               </Card>
             )}
           </TouchableOpacity>

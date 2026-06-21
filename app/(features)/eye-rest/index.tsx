@@ -19,8 +19,12 @@ import { COLORS } from '@/constants/colors';
 
 function formatCountdown(ms: number): string {
   const total = Math.max(0, ms);
-  const mins = Math.floor(total / 60000);
+  const hours = Math.floor(total / 3600000);
+  const mins = Math.floor((total % 3600000) / 60000);
   const secs = Math.floor((total % 60000) / 1000);
+  if (hours > 0) {
+    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  }
   return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 

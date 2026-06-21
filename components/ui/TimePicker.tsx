@@ -36,7 +36,15 @@ export function TimePicker({ value, onChange, label }: Props) {
       {editing ? (
         <TextInput
           value={draft}
-          onChangeText={setDraft}
+          onChangeText={(text) => {
+            setDraft(text);
+            // Eagerly propagate when format is valid so Save captures it
+            // even if blur hasn't fired yet
+            if (/^\d{2}:\d{2}$/.test(text)) {
+              const [h, m] = text.split(':').map(Number);
+              if (h >= 0 && h <= 23 && m >= 0 && m <= 59) onChange(text);
+            }
+          }}
           onBlur={commit}
           onSubmitEditing={commit}
           keyboardType="numbers-and-punctuation"

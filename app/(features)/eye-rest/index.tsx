@@ -87,8 +87,11 @@ export default function EyeRestScreen() {
 
   useEffect(() => {
     const sub = Notifications.addNotificationResponseReceivedListener((response) => {
+      const data = response.notification.request.content.data as any;
+      // Ignore rest-over notifications — they are informational only
+      if (data?.type === 'rest-over') return;
       const actionId = response.actionIdentifier;
-      const modeId = (response.notification.request.content.data as any)?.modeId as string | undefined;
+      const modeId = data?.modeId as string | undefined;
       if (actionId === EYE_REST_ACTION.STOP_REMINDERS) {
         cancelAllNotifications();
         setNextFireAt(null);

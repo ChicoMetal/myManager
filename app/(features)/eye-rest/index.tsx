@@ -174,7 +174,12 @@ export default function EyeRestScreen() {
 
         {enabled && !paused && nextFireAt ? (
           <TouchableOpacity
-            onPress={() => router.push('/(features)/eye-rest/modes' as any)}
+            onPress={() => {
+              const dest = activeModes.length === 1
+                ? `/(features)/eye-rest/mode/${activeModes[0].id}`
+                : '/(features)/eye-rest/modes';
+              router.push(dest as any);
+            }}
             activeOpacity={0.8}
           >
             {nextAlarmLabel.startsWith('Today') ? (

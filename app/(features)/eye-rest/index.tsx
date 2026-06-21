@@ -36,6 +36,7 @@ export default function EyeRestScreen() {
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [countdown, setCountdown] = useState('');
   const appState = useRef(AppState.currentState);
+  const rescheduling = useRef(false);
 
   const nextAlarmLabel = useMemo(() => {
     if (!nextFireAt) return '';
@@ -90,7 +91,10 @@ export default function EyeRestScreen() {
     const tick = () => {
       const diff = nextFireAt - Date.now();
       if (diff <= 0) {
-        reschedule(); // alarm fired — nextFireAt will update, countdown follows
+        if (!rescheduling.current) {
+          rescheduling.current = true;
+          reschedule().finally(() => { rescheduling.current = false; });
+        }
         return;
       }
       setCountdown(formatCountdown(diff));

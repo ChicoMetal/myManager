@@ -90,8 +90,7 @@ export default function EyeRestScreen() {
     const tick = () => {
       const diff = nextFireAt - Date.now();
       if (diff <= 0) {
-        setCountdown('');
-        reschedule(); // alarm fired — get next slot
+        reschedule(); // alarm fired — nextFireAt will update, countdown follows
         return;
       }
       setCountdown(formatCountdown(diff));

@@ -32,9 +32,13 @@ function formatCountdown(ms: number): string {
 
 export default function EyeRestScreen() {
   const router = useRouter();
-  const { enabled, paused, nextFireAt, setEnabled, setPaused, setNextFireAt, getActiveModes, activeModeIds } =
+  const { enabled, paused, nextFireAt, setEnabled, setPaused, setNextFireAt, activeModeIds, modes } =
     useEyeRestStore();
-  const activeModes = getActiveModes();
+  // Memoize so activeModes reference only changes when store data actually changes
+  const activeModes = useMemo(
+    () => modes.filter(m => activeModeIds.includes(m.id)),
+    [modes, activeModeIds]
+  );
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [countdown, setCountdown] = useState('');
   const appState = useRef(AppState.currentState);
@@ -61,11 +65,15 @@ export default function EyeRestScreen() {
     setNextFireAt(times[0]?.getTime() ?? null);
   }, [enabled, paused, activeModes, setNextFireAt]);
 
-  // Re-schedule whenever screen regains focus (e.g. after rest screen or mode editor)
+  // Keep a ref so useFocusEffect never needs reschedule in its deps
+  const rescheduleRef = useRef(reschedule);
+  rescheduleRef.current = reschedule;
+
+  // Re-schedule on actual screen focus only (not on every render/dep change)
   useFocusEffect(useCallback(() => {
     rescheduling.current = false;
-    reschedule();
-  }, [reschedule]));
+    rescheduleRef.current();
+  }, [])); // intentionally empty — fires on focus event, not dep changes
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (next: AppStateStatus) => {

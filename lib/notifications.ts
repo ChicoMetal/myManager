@@ -100,7 +100,7 @@ export async function scheduleEyeRestNotifications(
     await Notifications.scheduleNotificationAsync({
       content: {
         title: `👁 ${mode.name}`,
-        body: 'Look 20 feet away for 20 seconds.',
+        body: `Look 20 feet away for ${mode.restDurationSeconds < 60 ? `${mode.restDurationSeconds}s` : `${mode.restDurationSeconds / 60}m`}.`,
         sound: mode.sound ? `${mode.sound}.wav` : true,
         categoryIdentifier: CATEGORY_ID,
         data: { modeId: mode.id },

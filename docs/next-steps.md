@@ -93,7 +93,7 @@
 | B1 | `[ ]` | "Edit Mode" title for new mode | Dynamically set nav title in `mode/[id].tsx` based on `id === 'new'` |
 | B2 | `[ ]` | Dashboard card status stale after toggle | `getStatus()` called once at render; needs `useEyeRestStore` selector subscription |
 | B3 | `[ ]` | Dark mode on real device full verification | Simulator auto-switches; need manual test on physical device |
-| B4 | `[ ]` | Rest duration shows 20s even when mode configured to 10s | Two paths use `restDurationSeconds`: (1) foreground rest in `index.tsx` uses `activeModes[0]?.restDurationSeconds ?? 20` — the `?? 20` default may be firing; (2) `rest.tsx` also uses `?? 20`. Also: pre-scheduled rest-over notification uses the value from when `scheduleEyeRestNotifications` last ran — if mode was edited after that, the notification fires at the old duration. Needs tracing: log the value at each path to confirm which is wrong. |
+| B4 | `[x]` | Rest duration shows 20s even when mode configured to 10s | Fixed: `lib/notifications.ts:103` — notification body now interpolates `mode.restDurationSeconds` instead of hardcoded "20 seconds" |
 
 ---
 
@@ -159,6 +159,7 @@
 | D14 | 2026-06-20 | Sound files (8 options from macOS system sounds, afconvert 44.1kHz mono WAV) |
 | D15 | 2026-06-20 | dev.sh quick-start script (npm run dev:ios) |
 | D16 | 2026-06-20 | CLAUDE.md project guide + memory files |
+| D17 | 2026-06-21 | Fix notification body hardcoded "20s" → dynamic `mode.restDurationSeconds` |
 
 ---
 

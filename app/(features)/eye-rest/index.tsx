@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { View, Switch, AppState, AppStateStatus, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -35,6 +35,19 @@ export default function EyeRestScreen() {
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [countdown, setCountdown] = useState('');
   const appState = useRef(AppState.currentState);
+
+  const nextAlarmLabel = useMemo(() => {
+    if (!nextFireAt) return '';
+    const next = new Date(nextFireAt);
+    const now = new Date();
+    const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const timeStr = `${String(next.getHours()).padStart(2, '0')}:${String(next.getMinutes()).padStart(2, '0')}`;
+    if (next.toDateString() === now.toDateString()) return `Today at ${timeStr}`;
+    const tomorrow = new Date(now);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    if (next.toDateString() === tomorrow.toDateString()) return `Tomorrow at ${timeStr}`;
+    return `${DAYS[next.getDay()]} at ${timeStr}`;
+  }, [nextFireAt]);
 
   useEffect(() => { registerNotificationCategories(); }, []);
 
@@ -167,6 +180,9 @@ export default function EyeRestScreen() {
           <Card className="items-center py-6">
             <Text variant="sm" className="text-neutral-500 dark:text-neutral-400 mb-1">Next:</Text>
             <Text variant="4xl" className="text-brand-500 dark:text-brand-300">{countdown}</Text>
+            {nextAlarmLabel ? (
+              <Text variant="xs" className="text-neutral-400 mt-2">{nextAlarmLabel}</Text>
+            ) : null}
           </Card>
         ) : null}
 

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { View, ScrollView, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, Stack } from 'expo-router';
 import { useEyeRestStore, EyeRestMode } from '@/store/eye-rest.store';
 import { TimePicker } from '@/components/ui/TimePicker';
 import { DaySelector } from '@/components/ui/DaySelector';
@@ -55,6 +55,7 @@ export default function ModeEditorScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-neutral-900" edges={['bottom']}>
+      <Stack.Screen options={{ title: id === 'new' ? 'New Mode' : 'Edit Mode' }} />
       <ScrollView className="flex-1 px-4 pt-4" contentContainerClassName="gap-4 pb-12">
 
         <Card>

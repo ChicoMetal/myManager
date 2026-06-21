@@ -59,8 +59,11 @@ export default function EyeRestScreen() {
     setNextFireAt(times[0]?.getTime() ?? null);
   }, [enabled, paused, activeModes, setNextFireAt]);
 
-  // Re-schedule whenever screen regains focus (e.g. returning from mode editor)
-  useFocusEffect(useCallback(() => { reschedule(); }, [reschedule]));
+  // Re-schedule whenever screen regains focus (e.g. after rest screen or mode editor)
+  useFocusEffect(useCallback(() => {
+    rescheduling.current = false;
+    reschedule();
+  }, [reschedule]));
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (next: AppStateStatus) => {
@@ -93,7 +96,16 @@ export default function EyeRestScreen() {
       if (diff <= 0) {
         if (!rescheduling.current) {
           rescheduling.current = true;
-          reschedule().finally(() => { rescheduling.current = false; });
+          // App in foreground when alarm fires — open rest screen directly.
+          // useFocusEffect will reschedule when rest screen closes.
+          const firingMode = activeModes[0];
+          if (firingMode) {
+            router.push(
+              `/(features)/eye-rest/rest?modeId=${firingMode.id}&dismissed=true` as any
+            );
+          } else {
+            reschedule().finally(() => { rescheduling.current = false; });
+          }
         }
         return;
       }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { View, Switch, AppState, AppStateStatus, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import * as Notifications from 'expo-notifications';
 import { ChevronRight, Pause, Play, Moon } from 'lucide-react-native';
 import { useEyeRestStore } from '@/store/eye-rest.store';
@@ -57,6 +57,9 @@ export default function EyeRestScreen() {
     const times = await scheduleEyeRestNotifications(activeModes);
     setNextFireAt(times[0]?.getTime() ?? null);
   }, [enabled, paused, activeModes, setNextFireAt]);
+
+  // Re-schedule whenever screen regains focus (e.g. returning from mode editor)
+  useFocusEffect(useCallback(() => { reschedule(); }, [reschedule]));
 
   useEffect(() => {
     const sub = AppState.addEventListener('change', (next: AppStateStatus) => {

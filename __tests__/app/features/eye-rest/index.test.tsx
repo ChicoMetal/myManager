@@ -5,6 +5,7 @@ import { useEyeRestStore } from '@/store/eye-rest.store';
 
 jest.mock('expo-router', () => ({
   useRouter: () => ({ push: jest.fn() }),
+  useFocusEffect: jest.fn(),
 }));
 
 jest.mock('expo-notifications');

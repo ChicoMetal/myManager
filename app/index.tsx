@@ -12,7 +12,7 @@ export default function Dashboard() {
   return (
     <SafeAreaView className="flex-1 bg-neutral-50 dark:bg-neutral-900">
       <ScrollView className="flex-1 px-4" contentContainerClassName="py-8 gap-4">
-        <Text variant="2xl" className="mb-2">myManager</Text>
+        <Text variant="2xl" className="mb-2">My manager</Text>
         {FEATURES.map(feature => (
           <FeatureCard
             key={feature.id}

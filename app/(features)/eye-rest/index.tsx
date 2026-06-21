@@ -41,6 +41,13 @@ export default function EyeRestScreen() {
   );
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [countdown, setCountdown] = useState('');
+  const [nowMs, setNowMs] = useState(Date.now());
+
+  useEffect(() => {
+    if (!enabled) return;
+    const id = setInterval(() => setNowMs(Date.now()), 1000);
+    return () => clearInterval(id);
+  }, [enabled]);
   const appState = useRef(AppState.currentState);
   const rescheduling = useRef(false);
 
@@ -246,8 +253,10 @@ export default function EyeRestScreen() {
                     <Text variant="sm" className="text-neutral-500 dark:text-neutral-400">
                       Every {mode.intervalMinutes} min · {modeLabel}
                     </Text>
-                    {mode.id === schedulableModes[0]?.id && countdown ? (
-                      <Text variant="2xl" className="text-brand-500 dark:text-brand-300 mt-1">{countdown}</Text>
+                    {modeNextAt && modeNextAt.getTime() > nowMs ? (
+                      <Text variant="2xl" className="text-brand-500 dark:text-brand-300 mt-1">
+                        {formatCountdown(modeNextAt.getTime() - nowMs)}
+                      </Text>
                     ) : null}
                   </View>
                 ) : (

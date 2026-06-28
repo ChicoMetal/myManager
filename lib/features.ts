@@ -6,7 +6,7 @@ export type Feature = {
   icon: string;
   route: string;
   accentColor: string;
-  getStatus: () => string;
+  useStatus: () => string;
 };
 
 export const FEATURES: Feature[] = [
@@ -16,6 +16,6 @@ export const FEATURES: Feature[] = [
     icon: 'Eye',
     route: '/(features)/eye-rest',
     accentColor: '#a2d2ff',
-    getStatus: () => useEyeRestStore.getState().getStatusLine(),
+    useStatus: () => useEyeRestStore(s => s.getStatusLine()),
   },
 ];

@@ -91,7 +91,7 @@
 | # | Status | Task | Notes |
 |---|--------|------|-------|
 | B1 | `[ ]` | "Edit Mode" title for new mode | Dynamically set nav title in `mode/[id].tsx` based on `id === 'new'` |
-| B2 | `[ ]` | Dashboard card status stale after toggle | `getStatus()` called once at render; needs `useEyeRestStore` selector subscription |
+| B2 | `[x]` | Dashboard card status stale after toggle | `getStatus()` called once at render; needs `useEyeRestStore` selector subscription |
 | B3 | `[ ]` | Dark mode on real device full verification | Simulator auto-switches; need manual test on physical device |
 | B5 | `[ ]` | Eye Rest dashboard label shows "Off" when disabled — should show "On"/"Off" based on `enabled` state | Feature registry `getStatus()` in `lib/features.ts` / store `getStatusLine()` needs to reflect enabled toggle |
 | B6 | `[x]` | Pause button visible for out-of-schedule modes | Mode cards in `app/(features)/eye-rest/index.tsx` — hide pause button when mode is outside active time/day range (already shows Moon icon + "Resumes …" label, but pause btn still appears) |

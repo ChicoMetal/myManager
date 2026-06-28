@@ -4,7 +4,20 @@ import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FeatureCard } from '@/components/FeatureCard';
 import { Text } from '@/components/ui/Text';
-import { FEATURES } from '@/lib/features';
+import { FEATURES, Feature } from '@/lib/features';
+
+function FeatureCardWrapper({ feature, onPress }: { feature: Feature; onPress: () => void }) {
+  const status = feature.useStatus();
+  return (
+    <FeatureCard
+      title={feature.title}
+      icon={feature.icon}
+      accentColor={feature.accentColor}
+      status={status}
+      onPress={onPress}
+    />
+  );
+}
 
 export default function Dashboard() {
   const router = useRouter();
@@ -14,12 +27,9 @@ export default function Dashboard() {
       <ScrollView className="flex-1 px-4" contentContainerClassName="py-8 gap-4">
         <Text variant="2xl" className="mb-2">My manager</Text>
         {FEATURES.map(feature => (
-          <FeatureCard
+          <FeatureCardWrapper
             key={feature.id}
-            title={feature.title}
-            icon={feature.icon}
-            accentColor={feature.accentColor}
-            status={feature.getStatus()}
+            feature={feature}
             onPress={() => router.push(feature.route as any)}
           />
         ))}

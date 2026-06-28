@@ -30,7 +30,8 @@
 
 | # | Status | Task | Notes |
 |---|--------|------|-------|
-| E1 | `[ ]` | Add app icon | Generic icon currently used |
+| E1 | `[x]` | Add app icon | Butler icon (dark/gold) — deployed to simulator |
+| E1a | `[ ]` | Light mode app icon variant | Current icon is dark bg only; iOS 18 supports alternate icons — create light variant (`icon-light.png`: white bg + dark gold paths) and wire via `expo-alternate-app-icons` or custom config plugin |
 | E2 | `[ ]` | Add splash screen | `#a2d2ff` background, app name |
 | E3 | `[ ]` | Eye Rest history / stats screen | Track rest events, streaks |
 | E4 | `[ ]` | App-active health check | Weekly nudge notification + launch banner if `enabled=true` but zero notifications scheduled (`getAllScheduledNotificationsAsync`). iOS silently kills scheduled notifications after app update / device restart. |

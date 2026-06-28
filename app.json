@@ -5,16 +5,23 @@
     "scheme": "mymanager",
     "version": "1.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.personal.mymanager"
+      "bundleIdentifier": "com.personal.mymanager",
+      "icon": "./assets/icon.png"
     },
     "android": {
       "package": "com.personal.mymanager",
       "adaptiveIcon": {
-        "backgroundColor": "#a2d2ff"
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png",
+        "backgroundColor": "#0A0A0A"
       }
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router",

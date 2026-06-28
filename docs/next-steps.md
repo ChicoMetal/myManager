@@ -93,6 +93,11 @@
 | B1 | `[ ]` | "Edit Mode" title for new mode | Dynamically set nav title in `mode/[id].tsx` based on `id === 'new'` |
 | B2 | `[ ]` | Dashboard card status stale after toggle | `getStatus()` called once at render; needs `useEyeRestStore` selector subscription |
 | B3 | `[ ]` | Dark mode on real device full verification | Simulator auto-switches; need manual test on physical device |
+| B5 | `[ ]` | Eye Rest dashboard label shows "Off" when disabled — should show "On"/"Off" based on `enabled` state | Feature registry `getStatus()` in `lib/features.ts` / store `getStatusLine()` needs to reflect enabled toggle |
+| B6 | `[ ]` | Pause button visible for out-of-schedule modes | Mode cards in `app/(features)/eye-rest/index.tsx` — hide pause button when mode is outside active time/day range (already shows Moon icon + "Resumes …" label, but pause btn still appears) |
+| B7 | `[x]` | Out-of-range mode still shows countdown on real device | Verified on physical iPhone: when current time is outside mode's active window, card should show "Resumes [next valid time]" (Moon state) but instead keeps showing countdown ticking toward the next valid fire time — likely `getNextFireTimes()` returning a future in-range time and the card falling into `isToday` branch incorrectly |
+| B8 | `[ ]` | "Rest over" notification label too specific — rename to "Alert over" or mode-based label | `lib/notifications.ts` rest-over notification title/body hardcoded to "rest" language; should be generic ("Task over", "Time's up") to support future non-eye-rest alert types |
+| B9 | `[ ]` | Mode editor only supports preset interval values — add free-form cycle duration input | `app/(features)/eye-rest/mode/[id].tsx` — replace fixed picker with a numeric input (or picker + custom option) so users can enter any interval in minutes for the alert period |
 | B4 | `[x]` | Rest duration shows 20s even when mode configured to 10s | Fixed: `lib/notifications.ts:103` — notification body now interpolates `mode.restDurationSeconds` instead of hardcoded "20 seconds" |
 
 ---

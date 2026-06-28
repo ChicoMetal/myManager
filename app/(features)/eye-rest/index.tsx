@@ -279,6 +279,14 @@ export default function EyeRestScreen() {
             return `${DAYS[next.getDay()]} at ${timeStr}`;
           })() : null;
           const isToday = modeLabel?.startsWith('Today') ?? false;
+          const nowDate = new Date(nowMs);
+          const [startH, startM] = mode.activeStart.split(':').map(Number);
+          const [endH, endM] = mode.activeEnd.split(':').map(Number);
+          const nowMins = nowDate.getHours() * 60 + nowDate.getMinutes();
+          const isActiveNow = mode.activeDays.includes(nowDate.getDay())
+            && nowMins >= startH * 60 + startM
+            && nowMins < endH * 60 + endM;
+          const showCountdown = isToday && isActiveNow;
 
           return (
             <Card key={mode.id} className={`flex-row items-center gap-3 py-4${isModePaused ? ' opacity-50' : ''}`}>
@@ -295,7 +303,7 @@ export default function EyeRestScreen() {
                       <Text variant="sm" className="text-neutral-400">Paused</Text>
                     </View>
                   </View>
-                ) : isToday ? (
+                ) : showCountdown ? (
                   <View className="gap-1">
                     <Text variant="lg">{mode.name}</Text>
                     <Text variant="sm" className="text-neutral-500 dark:text-neutral-400">

@@ -325,21 +325,23 @@ export default function EyeRestScreen() {
                   </View>
                 )}
               </TouchableOpacity>
-              <TouchableOpacity
-                testID={`pause-btn-${mode.id}`}
-                onPress={() => handleToggleModePaused(mode.id)}
-                hitSlop={4}
-                activeOpacity={0.7}
-                className={`items-center justify-center w-12 h-12 rounded-full ${
-                  isModePaused
-                    ? 'bg-brand-100 dark:bg-brand-900'
-                    : 'bg-neutral-200 dark:bg-neutral-700'
-                }`}
-              >
-                {isModePaused
-                  ? <Play size={18} color={COLORS['brand-500']} />
-                  : <Pause size={18} color={COLORS['neutral-500']} />}
-              </TouchableOpacity>
+              {(isActiveNow || isModePaused) && (
+                <TouchableOpacity
+                  testID={`pause-btn-${mode.id}`}
+                  onPress={() => handleToggleModePaused(mode.id)}
+                  hitSlop={4}
+                  activeOpacity={0.7}
+                  className={`items-center justify-center w-12 h-12 rounded-full ${
+                    isModePaused
+                      ? 'bg-brand-100 dark:bg-brand-900'
+                      : 'bg-neutral-200 dark:bg-neutral-700'
+                  }`}
+                >
+                  {isModePaused
+                    ? <Play size={18} color={COLORS['brand-500']} />
+                    : <Pause size={18} color={COLORS['neutral-500']} />}
+                </TouchableOpacity>
+              )}
             </Card>
           );
         })}
